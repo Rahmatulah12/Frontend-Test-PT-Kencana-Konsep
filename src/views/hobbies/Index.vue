@@ -8,10 +8,10 @@
                 shaped
             >
                 <v-card-title>
-                    Student
+                    Hobby
                 </v-card-title>
                 <v-card-subtitle>
-                    List Student
+                    List Hobby
                 </v-card-subtitle>
 
                 <v-divider class="mt-1 mb-5 mx-3"></v-divider>
@@ -22,7 +22,7 @@
                         small
                         @click="$router.push('/add-student')"
                     >
-                        Add Student
+                        Add Hobby
                         <v-icon dark right>
                             mdi-plus
                         </v-icon>
@@ -71,13 +71,10 @@
                                         Name
                                     </th>
                                     <th class="text-justify">
-                                        Email
+                                        Created At
                                     </th>
                                     <th class="text-justify">
-                                        Phone
-                                    </th>
-                                    <th class="text-justify">
-                                        Address
+                                        Updated At
                                     </th>
                                     <th class="text-center">
                                         #
@@ -92,13 +89,10 @@
                                         {{ ucwords(item.name) }}
                                     </td>
                                     <td class="text-justify">
-                                        {{ ucwords(item.email) }}
+                                        {{ formatDate(item.created_at) }}
                                     </td>
                                     <td class="text-justify">
-                                        {{ ucwords(item.phone) }}
-                                    </td>
-                                    <td class="text-justify">
-                                        {{ ucwords(item.address) }}
+                                        {{ formatDate(item.updated_at) }}
                                     </td>
                                     <td class="text-center">
 
@@ -193,14 +187,15 @@
 </template>
 
 <script>
+import moment from "moment";
 import axios from '../../api';
   export default {
-    name: 'Student',
+    name: 'Hobby',
     metaInfo: {
         // if no subcomponents specify a metaInfo.title, this title will be used
         title: 'Test PT. Kencana Konsep',
         // all titles will be injected into this template
-        titleTemplate: '%s | Student'
+        titleTemplate: '%s | Hobby'
     },
     mounted(){
         this.page = 1;
@@ -226,12 +221,12 @@ import axios from '../../api';
         async getAllData(){
             try{
                 let url = this.keyword != null && this.keyword.length > 0 ? 
-                        `student?keyword=${this.keyword}&size=${this.size}&page=${this.page}` :
-                        `student?size=${this.size}&page=${this.page}`
+                        `hobby?keyword=${this.keyword}&size=${this.size}&page=${this.page}` :
+                        `hobby?size=${this.size}&page=${this.page}`
                 let data = await axios.get(url, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
                 if(data){
-                    this.items = data.data.data.data;
-                    this.totalPage = Math.ceil(data.data.data.total / this.size);
+                  this.items = data.data.data.data;
+                  this.totalPage = Math.ceil(data.data.data.total / this.size);
                 }
             } catch (err){
                 if(err.response.status == 401){
@@ -341,10 +336,9 @@ import axios from '../../api';
         async destroy(id)
         {
             try{
-                let data = axios.delete(`student/${id}`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
+                let data = axios.delete(`hobby/delete/${id}`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
                 if(data)
                 {
-                    console.log(JSON.stringify(data));
                     this.dialog = false;
                     this.selectedId = null;
                     this.getAllData();
@@ -379,7 +373,12 @@ import axios from '../../api';
                     });
                 }   
             }
-        }
+        },
+
+        formatDate(date)
+        {
+              return moment(date).format('MMMM Do YYYY, h:mm:ss a');
+        },
         
     },
   }

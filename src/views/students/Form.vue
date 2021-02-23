@@ -162,6 +162,7 @@
                         <v-btn
                               color="green darken-1"
                               type="submit"
+                              text
                               @click="submit()"
                         >
                               Save
@@ -251,7 +252,7 @@ export default {
                         let valid = this.$refs.observer.validate();
                         if(valid){
                               let submit;
-                              if(this.action === 'Add'){
+                              if(this.$route.params.id === undefined){
                                     submit = await axios.post(this.url, this.student, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
                               } else {
                                     submit = await axios.patch(this.url, this.student, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });

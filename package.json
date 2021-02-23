@@ -11,6 +11,7 @@
     "autocomplete-vue": "^1.1.0",
     "axios": "^0.21.1",
     "core-js": "^3.6.5",
+    "moment": "^2.29.1",
     "nprogress": "^0.2.0",
     "sweetalert2": "^10.15.5",
     "vee-validate": "^3.4.5",

@@ -44,7 +44,7 @@ const routes = [
   { // Student
     path: '/',
     redirect: '/student',
-    name: 'Main',
+    name: 'Main Student',
     component: () => import('../components/Main.vue'),
     children: [
 
@@ -78,6 +78,53 @@ const routes = [
         path: 'edit-student/:id',
         name: 'Edit Student',
         component: () => import('../views/students/Form.vue'),
+        beforeEnter: (to, from, next) => {
+          if(localStorage.getItem('token') == null)
+          {
+            next({name: "Login"});
+          }
+          next();
+        }
+      },
+
+    ],
+  },
+
+  { // Student
+    path: '/',
+    redirect: '/hobby',
+    name: 'Main Hobby',
+    component: () => import('../components/Main.vue'),
+    children: [
+
+      {
+        path: 'hobby',
+        name: 'Hobby',
+        component: () => import('../views/hobbies/Index.vue'),
+        beforeEnter: (to, from, next) => {
+          if(localStorage.getItem('token') == null)
+          {
+            next({name: "Login"});
+          }
+          next();
+        }
+      },
+
+
+    ],
+  },
+
+  { // Student Hobby
+    path: '/',
+    redirect: '/student-hobby',
+    name: 'Main Student Hobby',
+    component: () => import('../components/Main.vue'),
+    children: [
+
+      {
+        path: 'student-hobby',
+        name: 'Student Hobby',
+        component: () => import('../views/studentHobby/Index.vue'),
         beforeEnter: (to, from, next) => {
           if(localStorage.getItem('token') == null)
           {

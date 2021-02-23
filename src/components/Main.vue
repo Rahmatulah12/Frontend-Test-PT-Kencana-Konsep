@@ -36,6 +36,15 @@
                               </v-list-item>
                         </router-link>
 
+                         <router-link
+                              to="hobby"
+                              style="text-decoration: none;"
+                        >
+                              <v-list-item>
+                                    <v-list-item-title>Hobby</v-list-item-title>
+                              </v-list-item>
+                        </router-link>
+
                         <router-link to="student-hobby" style="text-decoration: none;">
                               <v-list-item>
                                     <v-list-item-title>Student Hobby</v-list-item-title>
