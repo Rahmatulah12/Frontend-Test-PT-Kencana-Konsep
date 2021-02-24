@@ -15,7 +15,7 @@
                         Student
                   </v-card-title>
                   <v-card-subtitle>
-                        {{ action }} Student
+                        {{ action }} Student Hobby
                   </v-card-subtitle>
 
                   <v-divider class="mt-1 mb-5 mx-3"></v-divider>
@@ -27,22 +27,23 @@
                   
                         <form @submit.prevent="submit">
                         
-                              <v-col cols="8" md="8" lg="8">
+                              <v-col cols="8" md="8" lg="8" v-if="$route.params.id !== undefined">
                                     <validation-provider
                                           v-slot="{ errors }"
-                                          name="Name"
+                                          name="Id"
                                           rules="required"
                                     >
                                           <v-text-field
-                                                v-model="student.name"
-                                                label="Name"
-                                                placeholder="Enter your name"
+                                                v-model="studentHobby.id"
+                                                label="Id"
+                                                placeholder="Enter your id"
                                                 required
                                                 outlined
                                                 filled
                                                 dense
-                                                :error-messages="errorMessage.name == '' ? errors : errorMessage.name"
+                                                :error-messages="errors"
                                                 @keyup="clear()"
+                                                readonly
                                           >
                                           </v-text-field>
                                     </validation-provider>
@@ -51,66 +52,36 @@
                               <v-col cols="8" md="8" lg="8">
                                     <validation-provider
                                           v-slot="{ errors }"
-                                          name="Email"
-                                          rules="required|email"
+                                          name="Student"
+                                          rules="required"
                                     >
-                                          <v-text-field
-                                                v-model="student.email"
-                                                label="Email"
-                                                placeholder="Enter your email"
-                                                required
+                                          <v-autocomplete
+                                                v-model="studentHobby.student_id"
+                                                :items="studentItems"
+                                                :value.sync="studentHobby.student_id"
                                                 outlined
-                                                filled
                                                 dense
-                                                type="email"
-                                                :error-messages="errorMessage.email == '' ? errors : errorMessage.email"
-                                                @keyup="clear()"
-                                          >
-                                          </v-text-field>
+                                                label="Student"
+                                                :error-messages="errors"
+                                          ></v-autocomplete>
                                     </validation-provider>
                               </v-col>
 
                               <v-col cols="8" md="8" lg="8">
                                     <validation-provider
                                           v-slot="{ errors }"
-                                          name="Phone"
-                                          rules="required|min:10|max:12"
-                                    >
-                                          <v-text-field
-                                                v-model="student.phone"
-                                                label="Phone"
-                                                placeholder="Enter your phone number"
-                                                required
-                                                outlined
-                                                filled
-                                                dense
-                                                type="number"
-                                                min="0"
-                                                :error-messages="errorMessage.phone == '' ? errors : errorMessage.phone"
-                                                @keyup="clear()"
-                                          >
-                                          </v-text-field>
-                                    </validation-provider>
-                              </v-col>
-                              <v-col cols="8" md="8" lg="8">
-                                    <validation-provider
-                                          v-slot="{ errors }"
-                                          name="Address"
+                                          name="Hobby"
                                           rules="required"
                                     >
-                                          <v-textarea
-                                                auto-grow
-                                                v-model="student.address"
-                                                label="Address"
-                                                placeholder="Enter your address"
-                                                required
+                                          <v-autocomplete
+                                                v-model="studentHobby.hoby_id"
+                                                :items="hobbyItems"
+                                                :value.sync="studentHobby.hoby_id"
                                                 outlined
-                                                filled
                                                 dense
-                                                :error-messages="errorMessage.address == '' ? errors : errorMessage.address"
-                                                @keyup="clear()"
-                                          >
-                                          </v-textarea>
+                                                label="Hobby"
+                                                :error-messages="errors"
+                                          ></v-autocomplete>
                                     </validation-provider>
                               </v-col>
 
@@ -181,9 +152,10 @@
       </v-row>
   </v-row>
 </template>
+
 <script>
 import axios from '../../api';
-import { required, email, min, max, digits } from 'vee-validate/dist/rules';
+import { required } from 'vee-validate/dist/rules';
 import { extend, ValidationObserver, ValidationProvider, setInteractionMode } from 'vee-validate';
 
 setInteractionMode('eager');
@@ -192,56 +164,37 @@ extend('required', {
     ...required,
     message: '{_field_} can not be empty',
 });
-
-extend('min', {
-    ...min,
-    message: '{_field_} min {length} characters',
-});
-
-extend('max', {
-    ...max,
-    message: '{_field_} max {length} characters',
-});
-
-extend('email', {
-    ...email,
-    message: 'Email must be valid',
-});
-
 export default {
       components: {
             ValidationProvider,
             ValidationObserver,
       },
 
-      'name' : 'FormStudent',
+      'name' : 'FormStudentHobby',
 
       data(){
             return{
+                  studentItems : [],
+                  hobbyItems : [],
+                  studentHobby: {
+                        id: null,
+                        student_id:null,
+                        hoby_id: null,
+                  },
                   action: '',
-                  student: {
-                        name: '',
-                        email: '',
-                        phone: '',
-                        address: '',
-                  },
-                  errorMessage: {
-                        name: '',
-                        email: '',
-                        phone: '',
-                        address: '',
-                  },
-                  dialog: false,
                   url: '',
+                  dialog: false,
             }
       },
 
       mounted() {
+            this.getDataStudent();
+            this.getDataHobby();
             this.action = this.$route.params.id === undefined ? "Add" : "Edit";
-            this.url = this.$route.params.id === undefined ? "student/add" : `student/update/${this.$route.params.id}`;
+            this.url = this.$route.params.id === undefined ? "student-hobby/add" : `student-hobby/update/${this.$route.params.id}`;
             if (this.$route.params.id !== undefined) {
                   // console.log(JSON.stringify(this.$router.params.id));
-                  this.getDataStudent(this.$route.params.id);
+                  this.getDataStudentHobby(this.$route.params.id);
             }
       },
 
@@ -252,15 +205,19 @@ export default {
                         let valid = this.$refs.observer.validate();
                         if(valid){
                               let submit;
+                              let data;
                               if(this.$route.params.id === undefined){
-                                    submit = await axios.post(this.url, this.student, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
+                                    data = {student_id : this.studentHobby.student_id, hoby_id: [this.studentHobby.hoby_id]};
+                                    submit = await axios.post(this.url, data, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
                               } else {
-                                    submit = await axios.patch(this.url, this.student, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
+                                    data = {student_id : this.studentHobby.student_id, hoby_id: this.studentHobby.hoby_id};
+                                    submit = await axios.patch(this.url, data, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
                               }
 
                               if(submit){
                                     this.dialog = false;
                                     this.$router.back();
+                                    data = {};
                                     this.$toast.open({
                                           message: `Data has been saved.`,
                                           type: "success",
@@ -271,10 +228,12 @@ export default {
                               }   
                         } else {
                               this.dialog = false;
+                              data = {};
                               return false;
                         }
                   } catch(err) {
                         this.dialog = false;
+                        data = {};
                         if(err.response.status == 401){
                               localStorage.removeItem("token");
                               this.$router.push("/login");
@@ -286,12 +245,6 @@ export default {
                                     duration: 5000,
                               });
                         } else {
-                              this.errorMessage = {
-                                    name: err.response.data.message.name[0] ? err.response.data.message.name[0] : '',
-                                    email: err.response.data.message.email[0] ? err.response.data.message.email[0] : '',
-                                    phone: err.response.data.message.phone[0] ? err.response.data.message.phone[0] : '',
-                                    address: err.response.data.message.address[0] ? err.response.data.message.address[0] : '',
-                              };
                               this.$toast.open({
                                     message: `${err.response.statusText}`,
                                     type: "error",
@@ -314,12 +267,80 @@ export default {
                   // this.$refs.observer.reset();
             },
 
-            async getDataStudent(id)
+            async getDataStudentHobby(id)
             {
                   try{
-                        let response = await axios.get(`student/${id}`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
+                        let response = await axios.get(`student-hobby/${id}`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
                         if(response){
-                              this.student = response.data.data;
+                              this.studentHobby = response.data.data;
+                        }
+                  } catch(err){
+                        if(err.response.status == 401){
+                              localStorage.removeItem("token");
+                              this.$router.push("/login");
+                              this.$toast.open({
+                                    message: `${err.response.data.message}`,
+                                    type: "error",
+                                    dissmissible: true,
+                                    position: "top-right",
+                                    duration: 5000,
+                              });
+                        } else {
+                              this.$toast.open({
+                                    message: `${err}`,
+                                    type: "error",
+                                    dissmissible: true,
+                                    position: "top-right",
+                                    duration: 5000,
+                              });
+                        } 
+                  }
+            },
+
+            ucwords(str){
+                  return str.replace (/\w\S*/g, 
+                  function(txt)
+                  {  return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(); } );
+            },
+
+            async getDataStudent(){
+                  try{
+                        let data = await axios.get('student/options', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
+                        if(data){
+                              for(let i = 0; i < data.data.data.length; i++){
+                                    this.studentItems.push({text: this.ucwords(data.data.data[i].name), value: data.data.data[i].id});
+                              }
+                        }
+                  } catch(err){
+                        if(err.response.status == 401){
+                              localStorage.removeItem("token");
+                              this.$router.push("/login");
+                              this.$toast.open({
+                                    message: `${err.response.data.message}`,
+                                    type: "error",
+                                    dissmissible: true,
+                                    position: "top-right",
+                                    duration: 5000,
+                              });
+                        } else {
+                              this.$toast.open({
+                                    message: `${err}`,
+                                    type: "error",
+                                    dissmissible: true,
+                                    position: "top-right",
+                                    duration: 5000,
+                              });
+                        } 
+                  }
+            },
+
+            async getDataHobby(){
+                  try{
+                        let data = await axios.get('hobby/options', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
+                        if(data){
+                              for(let i = 0; i < data.data.message.length; i++){
+                                    this.hobbyItems.push({text: this.ucwords(data.data.message[i].name), value: data.data.message[i].id});
+                              }
                         }
                   } catch(err){
                         if(err.response.status == 401){

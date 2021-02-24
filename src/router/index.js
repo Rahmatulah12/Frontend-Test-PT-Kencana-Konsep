@@ -90,7 +90,7 @@ const routes = [
     ],
   },
 
-  { // Student
+  { // Hobby
     path: '/',
     redirect: '/hobby',
     name: 'Main Hobby',
@@ -110,6 +110,31 @@ const routes = [
         }
       },
 
+      {
+        path: 'add-student-hobby',
+        name: 'Add Student Hobby',
+        component: () => import('../views/studentHobby/Form.vue'),
+        beforeEnter: (to, from, next) => {
+          if(localStorage.getItem('token') == null)
+          {
+            next({name: "Login"});
+          }
+          next();
+        }
+      },
+
+      {
+        path: 'edit-student-hobby/:id',
+        name: 'Edit Student Hobby',
+        component: () => import('../views/studentHobby/Form.vue'),
+        beforeEnter: (to, from, next) => {
+          if(localStorage.getItem('token') == null)
+          {
+            next({name: "Login"});
+          }
+          next();
+        }
+      },
 
     ],
   },
